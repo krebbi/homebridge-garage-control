@@ -1,10 +1,8 @@
 # homebridge-garage-control
 
-[![npm](https://img.shields.io/npm/v/homebridge-garage-remote-http.svg)](https://www.npmjs.com/package/homebridge-garage-remote-http-v2) [![npm](https://img.shields.io/npm/dt/homebridge-garage-remote-http.svg)](https://www.npmjs.com/package/homebridge-garage-remote-http-v2)
-
 ## Description
 
-This [homebridge](https://github.com/nfarina/homebridge) plugin exposes a web-based garage opener to Apple's [HomeKit](http://www.apple.com/ios/home/). Using simple HTTP requests, the plugin allows you to open/close the garage.
+This [homebridge](https://github.com/homebridge/homebridge) plugin exposes a web-based garage opener to Apple's [HomeKit](http://www.apple.com/ios/home/). Using simple HTTP requests, the plugin allows you to open/close the garage.
 
 Fork from homebridge-garage-remote-http-V2 
 
