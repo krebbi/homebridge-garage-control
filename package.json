@@ -1,6 +1,6 @@
 {
   "name": "homebridge-garage-control",
-  "version": "1.1.13",
+  "version": "1.0.1",
   "description": "Homebridge plugin for a simple web-based garage",
   "main": "index.js",
   "engines": {
@@ -25,7 +25,7 @@
     "home",
     "remote"
   ],
-  "author": "Fábio Mota",
+  "author": "krebbi",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/krebbi/homebridge-garage-control/issues"
