@@ -1,6 +1,6 @@
 {
   "name": "homebridge-garage-control",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "displayName": "Garage Door Control",
   "description": "Homebridge plugin for a simple web-based garage",
   "main": "index.js",
