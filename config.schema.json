@@ -1,5 +1,5 @@
 {
-  "pluginAlias": "GarageDoorOpener",
+  "pluginAlias": "GarageDoorControl",
   "pluginType": "accessory",
   "singular": true,
   "headerDisplay": "Homebridge plugin zur Steuerung eines Garagentors über HTTP-Anfragen.",
@@ -131,7 +131,7 @@
       "model": {
         "title": "Modell",
         "type": "string",
-        "default": "GarageDoorOpener",
+        "default": "GarageDoorControl",
         "description": "Modellbezeichnung (für HomeKit-Informationen)"
       },
       "serial": {

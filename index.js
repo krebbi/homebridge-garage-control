@@ -2,10 +2,10 @@ const axios = require('axios');
 const packageJson = require('./package.json');
 
 module.exports = (api) => {
-  api.registerAccessory('homebridge-garage-control', 'homebridge-garage-control\n', GarageDoorOpener);
+  api.registerAccessory('homebridge-garage-control', 'GarageDoorControl', GarageDoorControl);
 };
 
-class GarageDoorOpener {
+class GarageDoorControl {
   constructor(log, config, api) {
     this.log = log;
     this.config = config;
@@ -46,7 +46,7 @@ class GarageDoorOpener {
       .setCharacteristic(this.Characteristic.SerialNumber, this.serial)
       .setCharacteristic(this.Characteristic.FirmwareRevision, this.firmware);
 
-    this.service = new this.Service.GarageDoorOpener(this.name);
+    this.service = new this.Service.GarageDoorControl(this.name);
     this.service.getCharacteristic(this.Characteristic.TargetDoorState)
       .onSet(this.setTargetDoorState.bind(this));
 
