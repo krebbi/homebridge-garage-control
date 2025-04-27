@@ -20,7 +20,7 @@
       "autoLockDelay": 20,
       "manufacturer": "DIY",
       "serial": "1.0.0",
-      "model": "GarageDoorOpener",
+      "model": "GarageDoorControl",
       "firmware": "1.0.0",
       "username": "admin",
       "password": "pass123",
