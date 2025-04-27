@@ -11,7 +11,7 @@ class GarageDoorOpener {
     this.config = config;
     this.api = api;
 
-    // Konfigurationswerte mit Standardwerten
+    // Configuration values with defaults
     this.name = config.name;
     this.openURL = config.openURL;
     this.closeURL = config.closeURL;
@@ -33,10 +33,10 @@ class GarageDoorOpener {
     this.pollInterval = config.pollInterval || 120;
     this.statusURL = config.statusURL;
 
-    // Authentifizierung konfigurieren
+    // Configure authentication
     this.auth = (this.username && this.password) ? { username: this.username, password: this.password } : null;
 
-    // HomeKit-Dienste und Charakteristiken initialisieren
+    // Initialize HomeKit services and characteristics
     this.Service = this.api.hap.Service;
     this.Characteristic = this.api.hap.Characteristic;
 
@@ -50,19 +50,19 @@ class GarageDoorOpener {
     this.service.getCharacteristic(this.Characteristic.TargetDoorState)
       .onSet(this.setTargetDoorState.bind(this));
 
-    // Initialisierung nach Start
+    // Initialization after start
     this.api.on('didFinishLaunching', () => {
-      this.log.debug('Homebridge fertig geladen.');
+      this.log.debug('Homebridge finished loading.');
       if (this.polling) {
         this.startPolling();
       } else {
-        this.service.updateCharacteristic(this.Characteristic.CurrentDoorState, 1); // Geschlossen als Standard
+        this.service.updateCharacteristic(this.Characteristic.CurrentDoorState, 1); // Closed as default
         this.service.updateCharacteristic(this.Characteristic.TargetDoorState, 1);
       }
     });
   }
 
-  // HTTP-Anfrage-Methode
+  // HTTP request method
   async _httpRequest(url, method = 'GET', data = '') {
     try {
       const response = await axios({
@@ -75,112 +75,112 @@ class GarageDoorOpener {
       });
       return response.data;
     } catch (error) {
-      this.log.warn(`HTTP-Anfrage fehlgeschlagen: ${error.message}`);
+      this.log.warn(`HTTP request failed: ${error.message}`);
       throw error;
     }
   }
 
-  // Status abfragen
+  // Get status
   async _getStatus() {
     if (!this.statusURL) return;
-    this.log.debug(`Status abfragen: ${this.statusURL}`);
+    this.log.debug(`Polling status: ${this.statusURL}`);
     try {
       const status = await this._httpRequest(this.statusURL, 'GET');
       const state = parseInt(status);
       this.service.updateCharacteristic(this.Characteristic.CurrentDoorState, state);
 
-      // Zielstatus basierend auf aktuellem Status aktualisieren
+      // Update target state based on current state
       if (state === 0 || state === 2) {
-        this.service.updateCharacteristic(this.Characteristic.TargetDoorState, 0); // Offen
+        this.service.updateCharacteristic(this.Characteristic.TargetDoorState, 0); // Open
       } else if (state === 1 || state === 3) {
-        this.service.updateCharacteristic(this.Characteristic.TargetDoorState, 1); // Geschlossen
+        this.service.updateCharacteristic(this.Characteristic.TargetDoorState, 1); // Closed
       } else {
-        this.service.updateCharacteristic(this.Characteristic.TargetDoorState, 0); // Standard: Offen
-        this.log.warn(`Unbekannter Status: ${state}, setze auf 0`);
+        this.service.updateCharacteristic(this.Characteristic.TargetDoorState, 0); // Default: Open
+        this.log.warn(`Unknown state: ${state}, setting to 0`);
       }
-      this.log.debug(`Status aktualisiert: ${state}`);
+      this.log.debug(`Status updated: ${state}`);
     } catch (error) {
-      this.service.updateCharacteristic(this.Characteristic.CurrentDoorState, new Error('Polling fehlgeschlagen'));
+      this.service.updateCharacteristic(this.Characteristic.CurrentDoorState, new Error('Polling failed'));
     }
   }
 
-  // Zielstatus setzen
+  // Set target state
   async setTargetDoorState(value) {
     const url = value === 1 ? this.closeURL : this.openURL;
-    this.log.debug(`Setze Zielstatus auf ${value === 0 ? 'Offen' : 'Geschlossen'}`);
+    this.log.debug(`Setting target state to ${value === 0 ? 'Open' : 'Closed'}`);
 
     try {
       await this._httpRequest(url, this.httpMethod);
       this.service.updateCharacteristic(this.Characteristic.TargetDoorState, value);
 
       if (value === 1) {
-        this.log('Starte Schließen');
+        this.log('Starting Close');
         this.simulateClose();
       } else {
-        this.log('Starte Öffnen');
+        this.log('Starting Open');
         this.simulateOpen();
         if (this.switchOff) this.switchOffFunction();
         if (this.autoLock) this.autoLockFunction();
       }
     } catch (error) {
-      this.log.warn(`Fehler beim Setzen des Zielstatus: ${error.message}`);
+      this.log.warn(`Error setting target state: ${error.message}`);
       throw error;
     }
   }
 
-  // Simulation des Öffnens
+  // Simulate opening
   simulateOpen() {
-    this.service.updateCharacteristic(this.Characteristic.CurrentDoorState, 2); // Öffnen läuft
+    this.service.updateCharacteristic(this.Characteristic.CurrentDoorState, 2); // Opening in progress
     setTimeout(() => {
-      this.service.updateCharacteristic(this.Characteristic.CurrentDoorState, 0); // Offen
-      this.log('Öffnen abgeschlossen');
+      this.service.updateCharacteristic(this.Characteristic.CurrentDoorState, 0); // Open
+      this.log('Opening completed');
     }, this.openTime * 1000);
   }
 
-  // Simulation des Schließens
+  // Simulate closing
   simulateClose() {
-    this.service.updateCharacteristic(this.Characteristic.CurrentDoorState, 3); // Schließen läuft
+    this.service.updateCharacteristic(this.Characteristic.CurrentDoorState, 3); // Closing in progress
     setTimeout(() => {
-      this.service.updateCharacteristic(this.Characteristic.CurrentDoorState, 1); // Geschlossen
-      this.log('Schließen abgeschlossen');
+      this.service.updateCharacteristic(this.Characteristic.CurrentDoorState, 1); // Closed
+      this.log('Closing completed');
     }, this.closeTime * 1000);
   }
 
-  // Automatisches Schließen
+  // Auto lock function
   autoLockFunction() {
-    this.log(`Warte ${this.autoLockDelay} Sekunden für Autolock`);
+    this.log(`Waiting ${this.autoLockDelay} seconds for Autolock`);
     setTimeout(() => {
       this.log('Autolocking...');
       this.service.setCharacteristic(this.Characteristic.TargetDoorState, 1);
     }, this.autoLockDelay * 1000);
   }
 
-  // Switch-Off-Funktion
+  // Switch-Off function
   switchOffFunction() {
-    this.log(`Warte ${this.switchOffDelay} Sekunden für Switch-Off`);
+    this.log(`Waiting ${this.switchOffDelay} seconds for Switch-Off`);
     setTimeout(async () => {
       this.log('SwitchOff...');
       try {
         await this._httpRequest(this.closeURL, this.httpMethod);
       } catch (error) {
-        this.log.warn(`Switch-Off fehlgeschlagen: ${error.message}`);
+        this.log.warn(`Switch-Off failed: ${error.message}`);
       }
     }, this.switchOffDelay * 1000);
   }
 
-  // Polling starten
+  // Start polling
   startPolling() {
     this._getStatus();
     setInterval(() => this._getStatus(), this.pollInterval * 1000);
   }
 
-  // Identifikation (optional)
+  // Identification (optional)
   identify() {
     this.log('Identify requested!');
     return Promise.resolve();
   }
 
-  // Dienste bereitstellen
+  // Provide services
   getServices() {
     return [this.informationService, this.service];
   }

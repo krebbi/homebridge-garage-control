@@ -1,6 +1,7 @@
 {
   "name": "homebridge-garage-control",
-  "version": "1.0.1",
+  "version": "1.0.2",
+  "displayName": "Garage Door Control",
   "description": "Homebridge plugin for a simple web-based garage",
   "main": "index.js",
   "engines": {
@@ -25,10 +26,13 @@
     "home",
     "remote"
   ],
-  "author": "krebbi",
+  "author": {
+    "name": "krebbi",
+    "url": "https://github.com/krebbi"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/krebbi/homebridge-garage-control/issues"
   },
-  "homepage": "https://github.com/krebbi/homebridge-garage-control"
+  "homepage": "https://github.com/krebbi/homebridge-garage-control#readme"
 }
