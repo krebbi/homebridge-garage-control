@@ -19,7 +19,7 @@ The request Package has been replaced with axios.
 ```json
 "accessories": [
      {
-       "accessory": "GarageDoorOpenerV2",
+       "accessory": "homebridge-garage-control",
        "name": "Garage",
        "openURL": "http://myurl.com/open",
        "closeURL": "http://myurl.com/close",
@@ -36,7 +36,7 @@ The request Package has been replaced with axios.
 ### Core
 | Key | Description | Default |
 | --- | --- | --- |
-| `accessory` | Must be `GarageDoorOpenerV2` | N/A |
+| `accessory` | Must be `homebridge-garage-control` | N/A |
 | `name` | Name to appear in the Home app | N/A |
 | `openURL` | URL to trigger the opening of your garage | N/A |
 | `closeURL` | URL to trigger the closing of your garage | N/A |
