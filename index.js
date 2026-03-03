@@ -2,7 +2,7 @@ const axios = require('axios');
 const packageJson = require('./package.json');
 
 module.exports = (api) => {
-  api.registerAccessory('homebridge-garage-control', 'homebridge-garage-control', GarageDoorControl);
+  api.registerAccessory('GarageDoorControl', 'GarageDoorControl', GarageDoorControl);
 };
 
 class GarageDoorControl {
