@@ -17,18 +17,21 @@ The request Package has been replaced with axios.
 ## Configuration
 
 ```json
-"accessories": [
+"platforms": [
      {
-       "accessory": "homebridge-garage-control",
+       "platform": "homebridge-garage-control",
        "name": "Garage",
        "openURL": "http://myurl.com/open",
        "closeURL": "http://myurl.com/close",
-       "openTime": "30",
-       "closeTime": "30",
-       "autoLock": "true",
-       "autoLockDelay": "30",
-       "switchOff": "true",
-       "switchOffDelay": "10"
+       "statusURL": "http://myurl.com/status",
+       "openTime": 30,
+       "closeTime": 30,
+       "autoLock": true,
+       "autoLockDelay": 30,
+       "switchOff": true,
+       "switchOffDelay": 10,
+       "openStatusValues": "0,2,open,offen",
+       "closedStatusValues": "1,3,closed,geschlossen"
      }
 ]
 ```
@@ -36,7 +39,7 @@ The request Package has been replaced with axios.
 ### Core
 | Key | Description | Default |
 | --- | --- | --- |
-| `accessory` | Must be `homebridge-garage-control` | N/A |
+| `platform` | Must be `homebridge-garage-control` | N/A |
 | `name` | Name to appear in the Home app | N/A |
 | `openURL` | URL to trigger the opening of your garage | N/A |
 | `closeURL` | URL to trigger the closing of your garage | N/A |
@@ -52,7 +55,9 @@ The request Package has been replaced with axios.
 | `switchOffDelay` | Time (in seconds) until your garage will automatically close without animation (if enabled) | `2` |
 | `polling` | Whether the state should be polled at intervals | `false` |
 | `pollInterval` | Time (in seconds) between device polls (if `polling` is enabled) | `120` |
-| `statusURL` | URL to retrieve state on poll (should return `0`,`1`,`2`,`3` or `4` ) | N/A |
+| `statusURL` | URL to retrieve state on poll (for example `0`, `1`, `open`, `offen`, `closed`, `geschlossen`) | N/A |
+| `openStatusValues` | Comma-separated values that indicate the garage is open (e.g. `0,2,open,offen`) | `0,2,open,offen` |
+| `closedStatusValues` | Comma-separated values that indicate the garage is closed (e.g. `1,3,closed,geschlossen`) | `1,3,closed,geschlossen` |
 
 ### Additional options
 | Key | Description | Default |

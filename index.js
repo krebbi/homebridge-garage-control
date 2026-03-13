@@ -2,10 +2,24 @@ const axios = require('axios');
 const packageJson = require('./package.json');
 
 module.exports = (api) => {
-  api.registerAccessory('GarageDoorControl', 'GarageDoorControl', GarageDoorControl);
+  api.registerPlatform('homebridge-garage-control', GarageDoorControlPlatform);
 };
 
+class GarageDoorControlPlatform {
+  constructor(log, config, api) {
+    this.log = log;
+    this.config = config;
+    this.api = api;
+    this.accessoryList = [new GarageDoorControl(log, config, api)];
+  }
+
+  accessories(callback) {
+    callback(this.accessoryList);
+  }
+}
+
 class GarageDoorControl {
+  lastStatusText = undefined;
   constructor(log, config, api) {
     this.log = log;
     this.config = config;
@@ -32,6 +46,9 @@ class GarageDoorControl {
     this.polling = config.polling || false;
     this.pollInterval = config.pollInterval || 120;
     this.statusURL = config.statusURL;
+    // Konfigurierbare Statuswerte als normalisierte Vergleichswerte
+    this.openStatusValues = this.parseStatusValues(config.openStatusValues, ['0', '2', 'open', 'offen']);
+    this.closedStatusValues = this.parseStatusValues(config.closedStatusValues, ['1', '3', 'closed', 'geschlossen']);
 
     // Configure authentication
     this.auth = (this.username && this.password) ? { username: this.username, password: this.password } : null;
@@ -62,6 +79,34 @@ class GarageDoorControl {
     });
   }
 
+  parseStatusValues(value, fallback) {
+    const normalizeEntries = (entries) => {
+      const values = entries
+        .map((entry) => this.normalizeStatusValue(entry))
+        .filter((entry) => entry !== null);
+      return values.length > 0 ? values : fallback;
+    };
+
+    if (Array.isArray(value)) {
+      return normalizeEntries(value);
+    }
+
+    if (typeof value === 'string') {
+      return normalizeEntries(value.split(','));
+    }
+
+    return fallback;
+  }
+
+  normalizeStatusValue(value) {
+    if (value === undefined || value === null) {
+      return null;
+    }
+
+    const normalized = String(value).trim().toLowerCase();
+    return normalized.length > 0 ? normalized : null;
+  }
+
   // HTTP request method
   async _httpRequest(url, method = 'GET', data = '') {
     try {
@@ -83,22 +128,34 @@ class GarageDoorControl {
   // Get status
   async _getStatus() {
     if (!this.statusURL) return;
-    this.log.debug(`Polling status: ${this.statusURL}`);
+    this.log.info(`Polling status: ${this.statusURL}`);
     try {
       const status = await this._httpRequest(this.statusURL, 'GET');
-      const state = parseInt(status);
-      this.service.updateCharacteristic(this.Characteristic.CurrentDoorState, state);
-
-      // Update target state based on current state
-      if (state === 0 || state === 2) {
+      const normalizedState = this.normalizeStatusValue(status);
+      // Prüfe, ob der Status zu 'offen' oder 'geschlossen' gehört
+      let statusText = 'unknown';
+      if (normalizedState !== null && this.openStatusValues.includes(normalizedState)) {
+        this.service.updateCharacteristic(this.Characteristic.CurrentDoorState, 0); // Open
         this.service.updateCharacteristic(this.Characteristic.TargetDoorState, 0); // Open
-      } else if (state === 1 || state === 3) {
+        statusText = 'open';
+      } else if (normalizedState !== null && this.closedStatusValues.includes(normalizedState)) {
+        this.service.updateCharacteristic(this.Characteristic.CurrentDoorState, 1); // Closed
         this.service.updateCharacteristic(this.Characteristic.TargetDoorState, 1); // Closed
+        statusText = 'closed';
       } else {
+        const numericState = Number.parseInt(normalizedState, 10);
+        this.service.updateCharacteristic(
+          this.Characteristic.CurrentDoorState,
+          Number.isNaN(numericState) ? 4 : numericState,
+        );
         this.service.updateCharacteristic(this.Characteristic.TargetDoorState, 0); // Default: Open
-        this.log.warn(`Unknown state: ${state}, setting to 0`);
+        this.log.warn(`Unknown state: ${status}, setting TargetDoorState to 0`);
+        statusText = `unknown (value: ${status})`;
       }
-      this.log.debug(`Status updated: ${state}`);
+      if (statusText !== this.lastStatusText) {
+        this.log.info(`Status updated: ${statusText}`);
+        this.lastStatusText = statusText;
+      }
     } catch (error) {
       this.service.updateCharacteristic(this.Characteristic.CurrentDoorState, new Error('Polling failed'));
     }
@@ -126,6 +183,7 @@ class GarageDoorControl {
       this.log.warn(`Error setting target state: ${error.message}`);
       throw error;
     }
+    // ...existing code...
   }
 
   // Simulate opening

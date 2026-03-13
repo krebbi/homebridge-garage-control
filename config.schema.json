@@ -1,239 +1,100 @@
 {
-  "pluginAlias": "GarageDoorControl",
-  "pluginType": "accessory",
-  "singular": true,
+  "pluginAlias": "homebridge-garage-control",
+  "pluginType": "platform",
   "headerDisplay": "Homebridge plugin zur Steuerung eines Garagentors über HTTP-Anfragen.",
   "footerDisplay": "Für weitere Informationen besuchen Sie: <a href='https://github.com/krebbi/homebridge-garage-control' target='_blank'>GitHub Repository</a>",
   "schema": {
     "type": "object",
+    "required": ["name", "openURL", "closeURL"],
     "properties": {
       "name": {
         "title": "Name",
         "type": "string",
         "default": "Garagentor",
-        "required": true,
         "description": "Name des Garagentors in HomeKit"
       },
-      "openURL": {
-        "title": "Öffnen URL",
-        "type": "string",
-        "format": "uri",
-        "required": true,
-        "description": "URL, die aufgerufen wird, um das Tor zu öffnen"
-      },
-      "closeURL": {
-        "title": "Schließen URL",
-        "type": "string",
-        "format": "uri",
-        "required": true,
-        "description": "URL, die aufgerufen wird, um das Tor zu schließen"
-      },
-      "statusURL": {
-        "title": "Status URL",
-        "type": "string",
-        "format": "uri",
-        "description": "Optional: URL, die aufgerufen wird, um den Status des Tors abzufragen (erfordert Polling)"
-      },
-      "openTime": {
-        "title": "Öffnungszeit (Sekunden)",
-        "type": "integer",
-        "minimum": 1,
-        "maximum": 60,
-        "default": 10,
-        "description": "Zeit in Sekunden, die das Tor zum Öffnen benötigt"
-      },
-      "closeTime": {
-        "title": "Schließzeit (Sekunden)",
-        "type": "integer",
-        "minimum": 1,
-        "maximum": 60,
-        "default": 10,
-        "description": "Zeit in Sekunden, die das Tor zum Schließen benötigt"
-      },
-      "switchOff": {
-        "title": "Switch-Off aktivieren",
-        "type": "boolean",
-        "default": false,
-        "description": "Nach dem Öffnen einen zusätzlichen Befehl senden (z.B. um den Motor auszuschalten)"
-      },
-      "switchOffDelay": {
-        "title": "Switch-Off Verzögerung (Sekunden)",
-        "type": "integer",
-        "minimum": 1,
-        "maximum": 30,
-        "default": 2,
-        "description": "Verzögerung vor dem Senden des Switch-Off Befehls"
-      },
-      "autoLock": {
-        "title": "Auto-Lock aktivieren",
-        "type": "boolean",
-        "default": false,
-        "description": "Das Tor nach einer bestimmten Zeit automatisch schließen"
-      },
-      "autoLockDelay": {
-        "title": "Auto-Lock Verzögerung (Sekunden)",
-        "type": "integer",
-        "minimum": 5,
-        "maximum": 300,
-        "default": 20,
-        "description": "Zeit in Sekunden, nach der das Tor automatisch geschlossen wird"
-      },
-      "polling": {
-        "title": "Status-Abfrage aktivieren",
-        "type": "boolean",
-        "default": false,
-        "description": "Periodische Abfrage des Garagentor-Status (erfordert statusURL)"
-      },
-      "pollInterval": {
-        "title": "Abfrageintervall (Sekunden)",
-        "type": "integer",
-        "minimum": 5,
-        "maximum": 600,
-        "default": 120,
-        "description": "Intervall für die Status-Abfrage in Sekunden"
-      },
+      "openURL": { "type": "string", "title": "Öffnen URL", "format": "uri", "description": "URL zum Öffnen des Garagentors" },
+      "closeURL": { "type": "string", "title": "Schließen URL", "format": "uri", "description": "URL zum Schließen des Garagentors" },
+      "statusURL": { "type": "string", "title": "Status URL", "format": "uri", "description": "URL zur Statusabfrage des Garagentors" },
+      "openTime": { "type": "integer", "title": "Öffnungszeit (Sekunden)", "default": 10, "description": "Zeit zum Öffnen des Garagentors in Sekunden" },
+      "closeTime": { "type": "integer", "title": "Schließzeit (Sekunden)", "default": 10, "description": "Zeit zum Schließen des Garagentors in Sekunden" },
+      "switchOff": { "type": "boolean", "title": "Switch-Off aktivieren", "default": false, "description": "Switch-Off Funktion aktivieren" },
+      "switchOffDelay": { "type": "integer", "title": "Switch-Off Verzögerung (Sekunden)", "default": 2, "description": "Verzögerung für Switch-Off in Sekunden" },
+      "autoLock": { "type": "boolean", "title": "Auto-Lock aktivieren", "default": false, "description": "Auto-Lock Funktion aktivieren" },
+      "autoLockDelay": { "type": "integer", "title": "Auto-Lock Verzögerung (Sekunden)", "default": 20, "description": "Verzögerung für Auto-Lock in Sekunden" },
+      "polling": { "type": "boolean", "title": "Status-Abfrage aktivieren", "default": false, "description": "Status-Abfrage aktivieren" },
+      "pollInterval": { "type": "integer", "title": "Abfrageintervall (Sekunden)", "default": 120, "description": "Intervall für Status-Abfrage in Sekunden" },
       "http_method": {
-        "title": "HTTP-Methode",
         "type": "string",
+        "title": "HTTP-Methode",
         "default": "GET",
-        "oneOf": [
-          { "title": "GET", "enum": ["GET"] },
-          { "title": "POST", "enum": ["POST"] },
-          { "title": "PUT", "enum": ["PUT"] }
-        ],
+        "enum": ["GET", "POST", "PUT", "PATCH"],
         "description": "HTTP-Methode für Anfragen"
       },
-      "timeout": {
-        "title": "Timeout (Millisekunden)",
-        "type": "integer",
-        "minimum": 1000,
-        "maximum": 30000,
-        "default": 3000,
-        "description": "Timeout für HTTP-Anfragen in Millisekunden"
-      },
-      "username": {
-        "title": "Benutzername (optional)",
+      "timeout": { "type": "integer", "title": "Timeout (Millisekunden)", "default": 3000, "description": "Timeout für HTTP-Anfragen in Millisekunden" },
+      "manufacturer": { "type": "string", "title": "Hersteller", "default": "DIY", "description": "Hersteller des Garagentors" },
+      "model": { "type": "string", "title": "Modell", "default": "GarageDoorControl", "description": "Modellbezeichnung des Garagentors" },
+      "serial": { "type": "string", "title": "Seriennummer", "default": "1.0.0", "description": "Seriennummer des Garagentors" },
+      "firmware": { "type": "string", "title": "Firmware-Version", "default": "1.0.0", "description": "Firmware-Version des Garagentors" },
+      "openStatusValues": {
         "type": "string",
-        "description": "Benutzername für HTTP Basic Authentication"
+        "title": "Statuswerte für 'offen'",
+        "default": "0,2,open,offen",
+        "description": "Statuswerte, die als geöffnet interpretiert werden, kommagetrennt, z.B. 0,2,open,offen"
       },
-      "password": {
-        "title": "Passwort (optional)",
+      "closedStatusValues": {
         "type": "string",
-        "format": "password",
-        "description": "Passwort für HTTP Basic Authentication"
+        "title": "Statuswerte für 'geschlossen'",
+        "default": "1,3,closed,geschlossen",
+        "description": "Statuswerte, die als geschlossen interpretiert werden, kommagetrennt, z.B. 1,3,closed,geschlossen"
       },
-      "manufacturer": {
-        "title": "Hersteller",
-        "type": "string",
-        "default": "DIY",
-        "description": "Name des Herstellers (für HomeKit-Informationen)"
-      },
-      "model": {
-        "title": "Modell",
-        "type": "string",
-        "default": "GarageDoorControl",
-        "description": "Modellbezeichnung (für HomeKit-Informationen)"
-      },
-      "serial": {
-        "title": "Seriennummer",
-        "type": "string",
-        "default": "1.0.0",
-        "description": "Seriennummer (für HomeKit-Informationen)"
-      },
-      "firmware": {
-        "title": "Firmware-Version",
-        "type": "string",
-        "default": "1.0.0",
-        "description": "Firmware-Version (für HomeKit-Informationen)"
-      }
+      "username": { "type": "string", "title": "Benutzername", "description": "Optional: Benutzername für HTTP-Authentifizierung" },
+      "password": { "type": "string", "title": "Passwort", "description": "Optional: Passwort für HTTP-Authentifizierung", "format": "password" }
     }
   },
-  "form": [
-    {
-      "type": "help",
-      "helpvalue": "<h3>Grundeinstellungen</h3>"
-    },
+  "layout": [
     "name",
     {
-      "type": "fieldset",
       "title": "URLs",
-      "expandable": true,
-      "items": [
-        "openURL",
-        "closeURL",
-        "statusURL"
-      ]
-    },
-    {
       "type": "fieldset",
-      "title": "Zeiteinstellungen",
       "expandable": true,
-      "items": [
-        "openTime",
-        "closeTime"
-      ]
+      "expanded": false,
+      "items": ["openURL", "closeURL", "statusURL"]
     },
     {
-      "type": "help",
-      "helpvalue": "<h3>Erweiterte Funktionen</h3>"
-    },
-    {
+      "title": "Zeiten & Funktionen",
       "type": "fieldset",
-      "title": "Auto-Lock Konfiguration",
       "expandable": true,
-      "items": [
-        "autoLock",
-        {
-          "key": "autoLockDelay",
-          "condition": "model.autoLock === true"
-        }
-      ]
+      "expanded": false,
+      "items": ["openTime", "closeTime", "switchOff", "switchOffDelay", "autoLock", "autoLockDelay"]
     },
     {
+      "title": "Status & HTTP",
       "type": "fieldset",
-      "title": "Switch-Off Konfiguration",
       "expandable": true,
-      "items": [
-        "switchOff",
-        {
-          "key": "switchOffDelay",
-          "condition": "model.switchOff === true"
-        }
-      ]
+      "expanded": false,
+      "items": ["polling", "pollInterval", "http_method", "timeout"]
     },
     {
+      "title": "Geräteinfos",
       "type": "fieldset",
-      "title": "Status-Abfrage",
       "expandable": true,
-      "items": [
-        "polling",
-        {
-          "key": "pollInterval",
-          "condition": "model.polling === true"
-        }
-      ]
+      "expanded": false,
+      "items": ["manufacturer", "model", "serial", "firmware"]
     },
     {
+      "title": "Statuswerte",
       "type": "fieldset",
-      "title": "HTTP-Konfiguration",
       "expandable": true,
-      "items": [
-        "http_method",
-        "timeout",
-        "username",
-        "password"
-      ]
+      "expanded": false,
+      "items": ["openStatusValues", "closedStatusValues"]
     },
     {
+      "title": "Authentifizierung",
       "type": "fieldset",
-      "title": "Geräteinformationen",
       "expandable": true,
-      "items": [
-        "manufacturer",
-        "model",
-        "serial",
-        "firmware"
-      ]
+      "expanded": false,
+      "items": ["username", "password"]
     }
   ]
 }
