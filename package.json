@@ -4,6 +4,12 @@
   "displayName": "Garage Door Control",
   "description": "Homebridge plugin for a simple web-based garage",
   "main": "index.js",
+  "files": [
+    "index.js",
+    "config.schema.json",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "homebridge": "^1.6.0 || ^2.0.0-beta.0",
     "node": "^18.20.4 || ^20.15.1 || ^22 || ^24"
